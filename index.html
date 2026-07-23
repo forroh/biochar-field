@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#1F3864">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>현장조사 입력 | 중부칼리만탄 바이오차</title>
+<style>
+:root{
+  --navy:#1F3864; --navy2:#2E5090; --line:#D8DEE9; --bg:#F4F6F9;
+  --ink:#1B2430; --sub:#6B7684; --warn:#D9480F; --warnbg:#FFF0E6;
+  --ok:#2B8A3E; --okbg:#EBFBEE; --soil:#8B5E34; --water:#1971C2;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic","Apple SD Gothic Neo",Roboto,sans-serif;
+  background:var(--bg); color:var(--ink); font-size:16px; padding-bottom:96px}
+header{position:sticky;top:0;z-index:50;background:var(--navy);color:#fff;
+  padding:calc(env(safe-area-inset-top) + 10px) 14px 0}
+header h1{margin:0 0 2px;font-size:16px;font-weight:700}
+header p{margin:0 0 10px;font-size:11px;opacity:.7}
+nav{display:flex;gap:0}
+nav button{flex:1;background:none;border:none;border-bottom:3px solid transparent;color:#ffffff99;
+  font-size:14px;font-weight:600;padding:11px 0;font-family:inherit}
+nav button.on{color:#fff;border-bottom-color:#FFD43B}
+main{padding:14px 12px}
+.panel{display:none} .panel.on{display:block}
+
+.gps{background:#fff;border:1px solid var(--line);border-radius:14px;padding:13px 14px;margin-bottom:14px;
+  box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.gps .row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.gps .lbl{font-size:11px;color:var(--sub);font-weight:700;letter-spacing:.4px}
+.gps .co{font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:4px;letter-spacing:-.3px}
+.gps .meta{font-size:11px;color:var(--sub);margin-top:3px}
+.gps button{background:var(--navy2);color:#fff;border:none;border-radius:10px;
+  padding:11px 15px;font-size:13px;font-weight:700;font-family:inherit;white-space:nowrap}
+.gps.good{border-color:#8CE99A;background:var(--okbg)}
+.gps.bad{border-color:#FFC9C9;background:var(--warnbg)}
+
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:6px 14px 14px;margin-bottom:14px;
+  box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.card h2{font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--sub);margin:14px 0 10px;
+  text-transform:uppercase}
+.f{margin-bottom:12px}
+.f label{display:block;font-size:12.5px;font-weight:700;color:var(--sub);margin-bottom:5px}
+.f label .req{color:var(--warn)}
+input,select,textarea{width:100%;font-family:inherit;font-size:16px;padding:12px 12px;
+  border:1.5px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);appearance:none}
+input:focus,select,textarea:focus{outline:none;border-color:var(--navy2)}
+select{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8'><path d='M1 1l5 5 5-5' stroke='%236B7684' stroke-width='2' fill='none'/></svg>");
+  background-repeat:no-repeat;background-position:right 13px center;padding-right:34px}
+textarea{min-height:72px;resize:vertical}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.key input{border-color:var(--navy2);border-width:2px;font-size:19px;font-weight:700;text-align:center}
+.hint{font-size:11.5px;color:var(--sub);margin-top:5px}
+.flag{display:none;font-size:12px;font-weight:700;color:var(--warn);background:var(--warnbg);
+  border-radius:8px;padding:7px 10px;margin-top:6px}
+.flag.on{display:block}
+.judge{display:none;font-size:12px;font-weight:700;color:var(--ok);background:var(--okbg);
+  border-radius:8px;padding:7px 10px;margin-top:6px}
+.judge.on{display:block}
+
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:60;background:#fffffff2;backdrop-filter:blur(8px);
+  border-top:1px solid var(--line);padding:10px 12px calc(env(safe-area-inset-bottom) + 10px);
+  display:flex;gap:8px}
+.bar button{flex:1;border:none;border-radius:12px;padding:15px 0;font-size:15px;font-weight:800;
+  font-family:inherit;color:#fff;background:var(--navy)}
+.bar button.ghost{flex:0 0 90px;background:#fff;color:var(--sub);border:1.5px solid var(--line)}
+
+.rec{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 13px;margin-bottom:9px}
+.rec .t{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.rec .id{font-weight:800;font-size:14px}
+.rec .tag{font-size:10px;font-weight:800;padding:3px 8px;border-radius:20px;color:#fff}
+.rec .tag.s{background:var(--soil)} .rec .tag.w{background:var(--water)}
+.rec .v{font-size:12.5px;color:var(--sub);margin-top:6px;line-height:1.55;font-variant-numeric:tabular-nums}
+.rec .del{background:none;border:none;color:var(--warn);font-size:12px;font-weight:700;
+  padding:6px 0 0;font-family:inherit}
+.exp{display:flex;gap:8px;margin-bottom:14px}
+.exp button{flex:1;background:var(--navy);color:#fff;border:none;border-radius:12px;padding:14px 0;
+  font-size:14px;font-weight:800;font-family:inherit}
+.exp button.alt{background:#fff;color:var(--navy);border:1.5px solid var(--navy)}
+.empty{text-align:center;color:var(--sub);font-size:13px;padding:44px 0}
+.count{font-size:13px;color:var(--sub);font-weight:700;margin-bottom:10px}
+.sync{background:#fff;border:1px solid var(--line);border-radius:14px;padding:13px 14px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.sync .srow{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.sync .slbl{font-size:11px;color:var(--sub);font-weight:700;letter-spacing:.4px}
+.sync .sstat{font-size:14px;font-weight:700;margin-top:4px}
+.sync .sstat.ok{color:var(--ok)} .sync .sstat.wait{color:var(--warn)} .sync .sstat.off{color:var(--sub)}
+.sync>button,#syncBtn{background:var(--navy2);color:#fff;border:none;border-radius:10px;padding:11px 16px;font-size:13px;font-weight:700;font-family:inherit}
+.sync details{margin-top:12px;border-top:1px dashed var(--line);padding-top:10px}
+.sync summary{font-size:12.5px;font-weight:700;color:var(--navy2);cursor:pointer}
+.sync .cfgbtn{display:flex;gap:8px;margin-top:4px}
+.sync .cfgbtn button{flex:1;border-radius:10px;padding:11px 0;font-size:13px;font-weight:700;font-family:inherit;border:none;color:#fff;background:var(--navy)}
+.sync .cfgbtn button.alt{background:#fff;color:var(--navy);border:1.5px solid var(--navy)}
+.rec .schip{font-size:10px;font-weight:800;padding:2px 7px;border-radius:20px;margin-left:6px}
+.rec .schip.y{background:var(--okbg);color:var(--ok)} .rec .schip.n{background:var(--warnbg);color:var(--warn)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:110px;z-index:99;
+  background:#1B2430;color:#fff;font-size:14px;font-weight:700;padding:13px 22px;border-radius:24px;
+  opacity:0;transition:opacity .25s;pointer-events:none;max-width:88%;text-align:center}
+.toast.on{opacity:.95}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>토양·수질 현장조사 입력</h1>
+  <p>중부칼리만탄 바이오차 사업 · Central Kalimantan</p>
+  <nav>
+    <button id="tabSoil" class="on" onclick="tab('soil')">토양</button>
+    <button id="tabWater" onclick="tab('water')">수질</button>
+    <button id="tabList" onclick="tab('list')">기록 <span id="cnt"></span></button>
+  </nav>
+</header>
+
+<main>
+
+<!-- ================= 토양 ================= -->
+<section id="pSoil" class="panel on">
+  <div class="gps" id="gpsS">
+    <div class="row">
+      <div>
+        <div class="lbl">GPS 좌표</div>
+        <div class="co" id="coS">— 측위 대기 —</div>
+        <div class="meta" id="mtS">버튼을 눌러 현재 위치를 받으세요</div>
+      </div>
+      <button onclick="getGPS('S')">위치<br>받기</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>기본 정보</h2>
+    <div class="g2">
+      <div class="f"><label>조사일자</label><input type="date" id="s_date"></div>
+      <div class="f"><label>조사시각</label><input type="time" id="s_time"></div>
+    </div>
+    <div class="f"><label>조사자 <span class="req">*</span></label><input id="s_by" placeholder="성명" autocomplete="name"></div>
+    <div class="g2">
+      <div class="f"><label>조사구 ID <span class="req">*</span></label><input id="s_plot" placeholder="S-01"></div>
+      <div class="f"><label>지점번호(반복)</label>
+        <select id="s_rep"><option>P1</option><option>P2</option><option>P3</option><option>P4</option><option>P5</option></select></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>측정값</h2>
+    <div class="f key"><label>광량 (lux) <span class="req">*</span></label>
+      <input type="number" inputmode="decimal" id="s_lux" placeholder="45000">
+      <div class="hint">측정 시각에 따라 크게 변동 — 시각 확인</div></div>
+    <div class="f key"><label>토양온도 (℃) <span class="req">*</span></label>
+      <input type="number" inputmode="decimal" step="0.1" id="s_temp" placeholder="28.4"></div>
+    <div class="f key"><label>pH <span class="req">*</span></label>
+      <input type="number" inputmode="decimal" step="0.01" id="s_ph" placeholder="4.80" oninput="phSoil()">
+      <div class="judge" id="s_phj"></div>
+      <div class="flag" id="s_phf">pH 5.0 미만 — 강산성. 이탄지에서는 정상 범위일 수 있으나 재확인 권장</div></div>
+    <div class="f key"><label>토양습도 (%) <span class="req">*</span></label>
+      <input type="number" inputmode="decimal" step="0.1" id="s_hum" placeholder="32.5" oninput="humSoil()">
+      <div class="flag" id="s_humf">습도 15% 미만 — 프로브 삽입 상태 확인</div></div>
+    <div class="g2">
+      <div class="f"><label>측정깊이 (cm)</label><input type="number" inputmode="numeric" id="s_depth" value="10"></div>
+      <div class="f"><label>기온 (℃)</label><input type="number" inputmode="decimal" step="0.1" id="s_air" placeholder="31.0"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>입지 · 환경</h2>
+    <div class="f"><label>토지이용</label><select id="s_lu"></select></div>
+    <div class="f"><label>처리구분</label><select id="s_trt"></select></div>
+    <div class="g2">
+      <div class="f"><label>날씨</label><select id="s_wx"></select></div>
+      <div class="f"><label>최근 강우</label><select id="s_rain"></select></div>
+    </div>
+    <div class="g2">
+      <div class="f"><label>토색</label><select id="s_color"></select></div>
+      <div class="f"><label>토성(야외판정)</label><select id="s_tex"></select></div>
+    </div>
+    <div class="f"><label>지표피복</label><select id="s_cov"></select></div>
+  </div>
+
+  <div class="card">
+    <h2>행정구역</h2>
+    <div class="f"><label>Desa (마을)</label><input id="s_desa" placeholder="Sei Ahas"></div>
+    <div class="g2">
+      <div class="f"><label>Kecamatan</label><input id="s_kec" placeholder="Mantangai"></div>
+      <div class="f"><label>Kabupaten</label><select id="s_kab"></select></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>시료 · 기록</h2>
+    <div class="g2">
+      <div class="f"><label>시료채취</label><select id="s_smp"></select></div>
+      <div class="f"><label>시료번호</label><input id="s_smpno" placeholder="SS-2608-01"></div>
+    </div>
+    <div class="f"><label>사진번호</label><input id="s_photo" placeholder="IMG_0142"></div>
+    <div class="f"><label>비고 / 특이사항</label><textarea id="s_note" placeholder="이탄층 두께, 인접 수로, 작물 상태 등"></textarea></div>
+  </div>
+</section>
+
+<!-- ================= 수질 ================= -->
+<section id="pWater" class="panel">
+  <div class="gps" id="gpsW">
+    <div class="row">
+      <div>
+        <div class="lbl">GPS 좌표</div>
+        <div class="co" id="coW">— 측위 대기 —</div>
+        <div class="meta" id="mtW">버튼을 눌러 현재 위치를 받으세요</div>
+      </div>
+      <button onclick="getGPS('W')">위치<br>받기</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>기본 정보</h2>
+    <div class="g2">
+      <div class="f"><label>조사일자</label><input type="date" id="w_date"></div>
+      <div class="f"><label>조사시각</label><input type="time" id="w_time"></div>
+    </div>
+    <div class="f"><label>조사자 <span class="req">*</span></label><input id="w_by" placeholder="성명"></div>
+    <div class="g2">
+      <div class="f"><label>지점 ID <span class="req">*</span></label><input id="w_pt" placeholder="W-01"></div>
+      <div class="f"><label>수체구분</label><select id="w_type"></select></div>
+    </div>
+    <div class="f"><label>지점명</label><input id="w_name" placeholder="Kanal Sei Ahas 상류"></div>
+  </div>
+
+  <div class="card">
+    <h2>측정값</h2>
+    <div class="f key"><label>수온 (℃) <span class="req">*</span></label>
+      <input type="number" inputmode="decimal" step="0.1" id="w_temp" placeholder="29.6">
+      <div class="hint">TDS보다 먼저 측정</div></div>
+    <div class="f key"><label>pH <span class="req">*</span></label>
+      <input type="number" inputmode="decimal" step="0.01" id="w_ph" placeholder="4.20" oninput="phWater()">
+      <div class="judge" id="w_phj"></div>
+      <div class="flag" id="w_phf">pH 5.0 미만 — 강산성 (이탄수 특성일 수 있음)</div></div>
+    <div class="f key"><label>TDS (ppm) <span class="req">*</span></label>
+      <input type="number" inputmode="decimal" id="w_tds" placeholder="86" oninput="tdsCalc()">
+      <div class="judge" id="w_ec"></div>
+      <div class="flag" id="w_tdsf">TDS 1,000 ppm 초과 — 재측정 권장</div></div>
+    <div class="g3">
+      <div class="f"><label>채수깊이(cm)</label><input type="number" inputmode="numeric" id="w_dep" value="30"></div>
+      <div class="f"><label>수심(cm)</label><input type="number" inputmode="numeric" id="w_wd" placeholder="120"></div>
+      <div class="f"><label>기온(℃)</label><input type="number" inputmode="decimal" step="0.1" id="w_air" placeholder="32.0"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>관능 · 환경</h2>
+    <div class="g2">
+      <div class="f"><label>탁도(육안)</label><select id="w_turb"></select></div>
+      <div class="f"><label>물색</label><select id="w_color"></select></div>
+    </div>
+    <div class="g2">
+      <div class="f"><label>냄새</label><select id="w_odor"></select></div>
+      <div class="f"><label>유황</label><select id="w_flow"></select></div>
+    </div>
+    <div class="g2">
+      <div class="f"><label>날씨</label><select id="w_wx"></select></div>
+      <div class="f"><label>최근 강우</label><select id="w_rain"></select></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>행정구역</h2>
+    <div class="f"><label>Desa (마을)</label><input id="w_desa" placeholder="Sei Ahas"></div>
+    <div class="g2">
+      <div class="f"><label>Kecamatan</label><input id="w_kec" placeholder="Mantangai"></div>
+      <div class="f"><label>Kabupaten</label><select id="w_kab"></select></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>시료 · 기록</h2>
+    <div class="g2">
+      <div class="f"><label>시료채취</label><select id="w_smp"></select></div>
+      <div class="f"><label>시료번호</label><input id="w_smpno" placeholder="WS-2608-01"></div>
+    </div>
+    <div class="f"><label>사진번호</label><input id="w_photo" placeholder="IMG_0157"></div>
+    <div class="f"><label>비고 / 특이사항</label><textarea id="w_note" placeholder="유입원, 주변 토지이용 등"></textarea></div>
+  </div>
+</section>
+
+<!-- ================= 기록 ================= -->
+<section id="pList" class="panel">
+  <div class="sync">
+    <div class="srow">
+      <div>
+        <div class="slbl">서버 동기화 (Google 시트)</div>
+        <div class="sstat off" id="syncStat">서버 미설정</div>
+      </div>
+      <button id="syncBtn" onclick="syncAll(true)">동기화</button>
+    </div>
+    <details id="syncCfg">
+      <summary>서버 설정 / 주소 입력</summary>
+      <div class="f" style="margin-top:10px">
+        <label>Google 시트 서버 주소 (Apps Script 배포 URL)</label>
+        <input id="endpoint" placeholder="https://script.google.com/macros/s/.../exec" autocomplete="off" autocapitalize="off" spellcheck="false">
+      </div>
+      <div class="cfgbtn">
+        <button onclick="saveEndpoint()">저장</button>
+        <button class="alt" onclick="testEndpoint()">연결 확인</button>
+      </div>
+      <div class="hint">저장하면 이후 기록이 시트로 자동 전송됩니다. 통신이 끊기면 폰에 대기했다가 연결되면 자동 재전송됩니다. 폰 데이터는 지우지 않으니 CSV 백업도 그대로 가능합니다.</div>
+    </details>
+  </div>
+  <div class="exp">
+    <button onclick="exportCSV('soil')">토양 CSV</button>
+    <button onclick="exportCSV('water')">수질 CSV</button>
+    <button class="alt" onclick="exportCSV('all')">전체</button>
+  </div>
+  <div class="count" id="listCount"></div>
+  <div id="listBody"></div>
+</section>
+
+</main>
+
+<div class="bar" id="bar">
+  <button class="ghost" onclick="clearForm()">초기화</button>
+  <button onclick="save()">저장</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------------- 코드표 ---------------- */
+const CODE={
+ lu:["농경지(논)","농경지(밭)","이탄지(개간)","이탄지(자연)","조림지","2차림","관목지","초지","휴경지","기타"],
+ trt:["대조구(무처리)","바이오차 처리구","비교시비구","기타"],
+ wx:["맑음","구름조금","흐림","비","소나기","안개"],
+ rain:["24시간내 없음","24시간내 소량","24시간내 다량","48시간내 강우","불명"],
+ tex:["사토","사양토","양토","미사질양토","식양토","식토","이탄토"],
+ color:["암갈색","갈색","황갈색","적갈색","회갈색","흑색","회색","기타"],
+ cov:["나지","작물","잔재물","초본","낙엽층","기타"],
+ wtype:["하천(본류)","하천(지류)","배수로/카날","저수지/연못","우물/지하수","집수정","습지","기타"],
+ turb:["맑음","약간탁함","탁함","매우탁함"],
+ wcolor:["무색","황갈색","적갈색","흑갈색(이탄)","녹색","기타"],
+ odor:["없음","흙냄새","비린내","부패취","화학취"],
+ flow:["정체","완류","급류"],
+ smp:["미채취","채취"],
+ kab:["Kapuas","Pulang Pisau","Katingan","Gunung Mas","Kotawaringin Timur","기타"]
+};
+function fill(id,arr){const e=document.getElementById(id);if(!e)return;
+  e.innerHTML=arr.map(v=>`<option>${v}</option>`).join('')}
+[["s_lu","lu"],["s_trt","trt"],["s_wx","wx"],["s_rain","rain"],["s_color","color"],
+ ["s_tex","tex"],["s_cov","cov"],["s_smp","smp"],["s_kab","kab"],
+ ["w_type","wtype"],["w_turb","turb"],["w_color","wcolor"],["w_odor","odor"],
+ ["w_flow","flow"],["w_wx","wx"],["w_rain","rain"],["w_smp","smp"],["w_kab","kab"]
+].forEach(([id,k])=>fill(id,CODE[k]));
+
+/* ---------------- 상태 ---------------- */
+const KEY='ck_biochar_field_v1';
+let cur='soil';
+let GPS={S:null,W:null};
+const $=id=>document.getElementById(id);
+const load=()=>{try{return JSON.parse(localStorage.getItem(KEY))||[]}catch(e){return[]}};
+const store=d=>localStorage.setItem(KEY,JSON.stringify(d));
+
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');
+  clearTimeout(t._x);t._x=setTimeout(()=>t.classList.remove('on'),2200)}
+
+function tab(t){
+  cur=t;
+  ['soil','water','list'].forEach(x=>{
+    $('p'+x[0].toUpperCase()+x.slice(1)).classList.toggle('on',x===t);
+    $('tab'+x[0].toUpperCase()+x.slice(1)).classList.toggle('on',x===t);
+  });
+  $('bar').style.display = t==='list' ? 'none' : 'flex';
+  if(t==='list') renderList();
+  window.scrollTo(0,0);
+}
+
+/* ---------------- GPS ---------------- */
+function getGPS(k){
+  const box=$('gps'+k), co=$('co'+k), mt=$('mt'+k);
+  if(!navigator.geolocation){mt.textContent='이 브라우저는 위치기능을 지원하지 않습니다';box.className='gps bad';return}
+  co.textContent='측위 중…'; mt.textContent='하늘이 트인 곳에서 5~15초 소요'; box.className='gps';
+  navigator.geolocation.getCurrentPosition(p=>{
+    const c=p.coords;
+    GPS[k]={lat:c.latitude,lon:c.longitude,alt:c.altitude,acc:c.accuracy,t:new Date(p.timestamp)};
+    co.textContent=`${c.latitude.toFixed(6)},  ${c.longitude.toFixed(6)}`;
+    const alt=(c.altitude!=null&&isFinite(c.altitude))?` · 고도 ${c.altitude.toFixed(0)}m`:'';
+    mt.textContent=`정확도 ±${c.accuracy.toFixed(0)}m${alt} · ${GPS[k].t.toLocaleTimeString('ko-KR')}`;
+    box.className = c.accuracy<=20 ? 'gps good' : 'gps bad';
+    if(c.accuracy>20) mt.textContent+=' — 정확도 낮음, 재측위 권장';
+  },err=>{
+    box.className='gps bad'; co.textContent='측위 실패';
+    const m={1:'위치 권한이 거부되었습니다. 브라우저 설정에서 허용해 주세요.',
+             2:'위치를 확인할 수 없습니다. 실외로 이동 후 재시도.',
+             3:'시간 초과. 다시 눌러 주세요.'};
+    mt.textContent=m[err.code]||err.message;
+  },{enableHighAccuracy:true,timeout:20000,maximumAge:0});
+}
+
+/* ---------------- 실시간 판정 ---------------- */
+function phSoil(){
+  const v=parseFloat($('s_ph').value), j=$('s_phj'), f=$('s_phf');
+  f.classList.toggle('on', isFinite(v)&&v<5);
+  if(!isFinite(v)){j.classList.remove('on');return}
+  const t = v<5?'강산성': v<6?'산성': v<6.5?'약산성': v<=7.5?'중성': v<=8.5?'약알칼리':'알칼리';
+  j.textContent='판정: '+t; j.classList.add('on');
+}
+function humSoil(){const v=parseFloat($('s_hum').value);
+  $('s_humf').classList.toggle('on', isFinite(v)&&v<15)}
+function phWater(){
+  const v=parseFloat($('w_ph').value), j=$('w_phj'), f=$('w_phf');
+  f.classList.toggle('on', isFinite(v)&&v<5);
+  if(!isFinite(v)){j.classList.remove('on');return}
+  const t = v<5?'강산성': v<6.5?'산성': v<=8.5?'중성역':'알칼리';
+  j.textContent='판정: '+t; j.classList.add('on');
+}
+function tdsCalc(){
+  const v=parseFloat($('w_tds').value), j=$('w_ec');
+  $('w_tdsf').classList.toggle('on', isFinite(v)&&v>1000);
+  if(!isFinite(v)){j.classList.remove('on');return}
+  j.textContent=`EC 환산 ≈ ${Math.round(v/0.64).toLocaleString()} µS/cm`; j.classList.add('on');
+}
+
+/* ---------------- 폼 ---------------- */
+function nowFill(){
+  const d=new Date(), p=n=>String(n).padStart(2,'0');
+  const ds=`${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;
+  const ts=`${p(d.getHours())}:${p(d.getMinutes())}`;
+  ['s','w'].forEach(k=>{ if(!$(k+'_date').value)$(k+'_date').value=ds; $(k+'_time').value=ts; });
+}
+const S_TXT=['s_by','s_plot','s_desa','s_kec','s_smpno','s_photo','s_note'];
+const W_TXT=['w_by','w_pt','w_name','w_desa','w_kec','w_smpno','w_photo','w_note'];
+const S_NUM=['s_lux','s_temp','s_ph','s_hum','s_air'];
+const W_NUM=['w_temp','w_ph','w_tds','w_air','w_wd'];
+
+function clearForm(){
+  const k = cur==='soil'?'s':'w';
+  (k==='s'?S_NUM:W_NUM).forEach(i=>$(i).value='');
+  (k==='s'?['s_smpno','s_photo','s_note']:['w_smpno','w_photo','w_note']).forEach(i=>$(i).value='');
+  ['s_phj','s_phf','s_humf','w_phj','w_phf','w_tdsf','w_ec'].forEach(i=>$(i).classList.remove('on'));
+  nowFill(); toast('측정값을 초기화했습니다');
+}
+
+function save(){
+  const soil = cur==='soil';
+  const k = soil?'s':'w', G = GPS[soil?'S':'W'];
+  const req = soil ? [['s_by','조사자'],['s_plot','조사구 ID'],['s_lux','광량'],['s_temp','토양온도'],['s_ph','pH'],['s_hum','토양습도']]
+                   : [['w_by','조사자'],['w_pt','지점 ID'],['w_temp','수온'],['w_ph','pH'],['w_tds','TDS']];
+  for(const [id,nm] of req){ if(!$(id).value){ $(id).focus(); toast(nm+' 항목을 입력하세요'); return } }
+  if(!G && !confirm('GPS 좌표가 없습니다. 좌표 없이 저장할까요?')) return;
+
+  const base={ id:Date.now(), kind: soil?'soil':'water', synced:false,
+    date:$(k+'_date').value, time:$(k+'_time').value, by:$(k+'_by').value.trim(),
+    lat:G?+G.lat.toFixed(6):'', lon:G?+G.lon.toFixed(6):'',
+    alt:(G&&G.alt!=null&&isFinite(G.alt))?Math.round(G.alt):'',
+    acc:G?Math.round(G.acc):'',
+    desa:$(k+'_desa').value.trim(), kec:$(k+'_kec').value.trim(), kab:$(k+'_kab').value,
+    smp:$(k+'_smp').value, smpno:$(k+'_smpno').value.trim(),
+    photo:$(k+'_photo').value.trim(), note:$(k+'_note').value.trim() };
+
+  const rec = soil ? Object.assign(base,{
+      plot:$('s_plot').value.trim(), rep:$('s_rep').value,
+      lux:+$('s_lux').value, temp:+$('s_temp').value, ph:+$('s_ph').value, hum:+$('s_hum').value,
+      depth:$('s_depth').value, air:$('s_air').value,
+      lu:$('s_lu').value, trt:$('s_trt').value, wx:$('s_wx').value, rain:$('s_rain').value,
+      color:$('s_color').value, tex:$('s_tex').value, cov:$('s_cov').value })
+    : Object.assign(base,{
+      plot:$('w_pt').value.trim(), name:$('w_name').value.trim(), wtype:$('w_type').value,
+      temp:+$('w_temp').value, ph:+$('w_ph').value, tds:+$('w_tds').value,
+      ec:Math.round(+$('w_tds').value/0.64),
+      dep:$('w_dep').value, wd:$('w_wd').value, air:$('w_air').value,
+      turb:$('w_turb').value, color:$('w_color').value, odor:$('w_odor').value,
+      flow:$('w_flow').value, wx:$('w_wx').value, rain:$('w_rain').value });
+
+  const d=load(); d.push(rec); store(d);
+  localStorage.setItem('ck_by_'+k, rec.by);
+  localStorage.setItem('ck_plot_'+k, rec.plot);
+  updCount();
+  push([rec]);
+  toast('저장 완료 — 총 '+d.length+'건');
+  clearForm();
+  if(soil){ const m=$('s_rep'); if(m.selectedIndex<m.options.length-1) m.selectedIndex++; }
+}
+
+/* ---------------- 목록 ---------------- */
+function updCount(){ const n=load().length; $('cnt').textContent = n?`(${n})`:''; syncStatus(); }
+
+function renderList(){
+  const d=load().slice().reverse();
+  $('listCount').textContent = `총 ${d.length}건 · 토양 ${d.filter(r=>r.kind==='soil').length} · 수질 ${d.filter(r=>r.kind==='water').length}`;
+  if(!d.length){ $('listBody').innerHTML='<div class="empty">아직 저장된 기록이 없습니다</div>'; return }
+  $('listBody').innerHTML = d.map(r=>{
+    const v = r.kind==='soil'
+      ? `광량 ${(+r.lux).toLocaleString()} lux · 온도 ${r.temp}℃ · pH ${r.ph} · 습도 ${r.hum}%`
+      : `수온 ${r.temp}℃ · pH ${r.ph} · TDS ${(+r.tds).toLocaleString()} ppm`;
+    const g = r.lat ? `${r.lat}, ${r.lon} (±${r.acc}m)` : '<span style="color:#D9480F">좌표 없음</span>';
+    return `<div class="rec">
+      <div class="t"><span class="id">${r.plot}${r.rep?' / '+r.rep:''}</span>
+        <span class="tag ${r.kind==='soil'?'s':'w'}">${r.kind==='soil'?'토양':'수질'}</span></div>
+      <div class="v">${r.date} ${r.time} · ${r.by}<br>${v}<br>${g}
+        <span class="schip ${r.synced?'y':'n'}">${r.synced?'전송됨':'대기'}</span></div>
+      <button class="del" onclick="del(${r.id})">삭제</button></div>`;
+  }).join('');
+}
+function del(id){ if(!confirm('이 기록을 삭제할까요?'))return;
+  store(load().filter(r=>r.id!==id)); renderList(); updCount(); toast('삭제했습니다') }
+
+/* ---------------- 서버 동기화 (Google 시트) ---------------- */
+const EPKEY='ck_endpoint';
+const getEP=()=>localStorage.getItem(EPKEY)||'';
+
+function saveEndpoint(){
+  let u=$('endpoint').value.trim();
+  if(u && !/^https:\/\//.test(u)){ toast('https:// 로 시작하는 주소를 넣어주세요'); return; }
+  localStorage.setItem(EPKEY,u);
+  toast(u?'서버 주소를 저장했습니다':'서버 주소를 지웠습니다');
+  syncStatus();
+  if(u) syncAll(false);
+}
+
+function testEndpoint(){
+  const u=getEP()||$('endpoint').value.trim();
+  if(!u){ toast('먼저 주소를 입력하세요'); return; }
+  toast('연결 확인 중…');
+  fetch(u,{method:'GET'}).then(()=>toast('서버 응답 확인 — 정상'))
+    .catch(()=>toast('연결 실패 — 주소/배포 상태를 확인하세요'));
+}
+
+// 서버로 전송. no-cors 라 응답 본문은 못 읽지만, 네트워크 성공 시 전송 성공으로 간주.
+// 로컬 데이터는 지우지 않으므로 만일의 누락도 재동기화/CSV로 복구 가능.
+function push(recs){
+  const u=getEP(); if(!u || !recs.length) return Promise.resolve(false);
+  return fetch(u,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify({records:recs})})
+    .then(()=>{ markSynced(recs.map(r=>r.id)); return true; })
+    .catch(()=>false);
+}
+
+function markSynced(ids){
+  const set=new Set(ids), d=load();
+  d.forEach(r=>{ if(set.has(r.id)) r.synced=true; });
+  store(d); syncStatus();
+  if($('pList').classList.contains('on')) renderList();
+}
+
+function pending(){ return load().filter(r=>!r.synced); }
+
+function syncStatus(){
+  const st=$('syncStat'); if(!st) return;
+  if(!getEP()){ st.textContent='서버 미설정 — 아래 설정에서 주소 입력'; st.className='sstat off'; return; }
+  const p=pending().length;
+  if(p===0){ st.textContent='모두 전송됨 ✓'; st.className='sstat ok'; }
+  else { st.textContent=`전송 대기 ${p}건`; st.className='sstat wait'; }
+}
+
+function syncAll(manual){
+  const u=getEP();
+  if(!u){ if(manual) toast('먼저 서버 주소를 설정하세요'); return; }
+  const p=pending();
+  if(!p.length){ if(manual) toast('모두 전송되었습니다'); return; }
+  if(manual) toast(`${p.length}건 전송 중…`);
+  push(p).then(ok=>{ if(manual) toast(ok?'전송 완료':'전송 실패 — 통신 상태를 확인하세요'); });
+}
+
+/* ---------------- CSV ---------------- */
+const SH=['No','조사일자','조사시각','조사자','조사구ID','지점번호','위도','경도','고도(m)','GPS정확도(m)',
+  'Desa','Kecamatan','Kabupaten','토지이용','처리구분','측정깊이(cm)','광량(lux)','토양온도(℃)','pH','토양습도(%)',
+  '기온(℃)','날씨','최근강우','토색','토성','지표피복','시료채취','시료번호','사진번호','비고'];
+const WH=['No','조사일자','조사시각','조사자','지점ID','지점명','위도','경도','GPS정확도(m)',
+  'Desa','Kecamatan','Kabupaten','수체구분','채수깊이(cm)','수온(℃)','pH','TDS(ppm)','EC환산(µS/cm)',
+  '수심(cm)','기온(℃)','날씨','최근강우','탁도','물색','냄새','유황','시료채취','시료번호','사진번호','비고'];
+const rowS=(r,i)=>[i+1,r.date,r.time,r.by,r.plot,r.rep,r.lat,r.lon,r.alt,r.acc,r.desa,r.kec,r.kab,
+  r.lu,r.trt,r.depth,r.lux,r.temp,r.ph,r.hum,r.air,r.wx,r.rain,r.color,r.tex,r.cov,r.smp,r.smpno,r.photo,r.note];
+const rowW=(r,i)=>[i+1,r.date,r.time,r.by,r.plot,r.name,r.lat,r.lon,r.acc,r.desa,r.kec,r.kab,r.wtype,
+  r.dep,r.temp,r.ph,r.tds,r.ec,r.wd,r.air,r.wx,r.rain,r.turb,r.color,r.odor,r.flow,r.smp,r.smpno,r.photo,r.note];
+const q=v=>{v=v==null?'':String(v); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
+
+function csvText(kind){
+  const d=load().filter(r=>r.kind===kind);
+  if(!d.length) return null;
+  const h = kind==='soil'?SH:WH, f = kind==='soil'?rowS:rowW;
+  return '﻿'+[h.join(','), ...d.map((r,i)=>f(r,i).map(q).join(','))].join('\r\n');
+}
+function dl(name,text){
+  const b=new Blob([text],{type:'text/csv;charset=utf-8'}), u=URL.createObjectURL(b);
+  const a=document.createElement('a'); a.href=u; a.download=name; document.body.appendChild(a);
+  a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(u),1500);
+}
+function stamp(){const d=new Date(),p=n=>String(n).padStart(2,'0');
+  return `${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}`}
+
+function exportCSV(which){
+  const jobs = which==='all' ? ['soil','water'] : [which];
+  let n=0;
+  jobs.forEach((k,idx)=>{
+    const t=csvText(k); if(!t) return; n++;
+    setTimeout(()=>dl(`현장조사_${k==='soil'?'토양':'수질'}_${stamp()}.csv`, t), idx*700);
+  });
+  toast(n? 'CSV를 내려받습니다 — 엑셀 야장에 붙여넣으세요' : '내보낼 기록이 없습니다');
+}
+
+/* ---------------- 초기화 ---------------- */
+nowFill(); updCount();
+['s','w'].forEach(k=>{
+  const b=localStorage.getItem('ck_by_'+k), p=localStorage.getItem('ck_plot_'+k);
+  if(b) $(k+'_by').value=b;
+  if(p) $(k==='s'?'s_plot':'w_pt').value=p;
+});
+$('s_smp').value='미채취'; $('w_smp').value='미채취';
+$('endpoint').value=getEP();
+syncStatus();
+if(getEP()) setTimeout(()=>syncAll(false),1500);
+window.addEventListener('online', ()=>syncAll(false));
+window.addEventListener('beforeunload',e=>{
+  if($('s_ph').value||$('w_ph').value){e.preventDefault();e.returnValue=''}
+});
+setTimeout(()=>getGPS('S'),600);
+</script>
+</body>
+</html>
